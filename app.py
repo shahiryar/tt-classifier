@@ -16,7 +16,7 @@ def load_cache():
         st.session_state['label_code'] =  json.load(file)
     st.session_state["add_new_class_active"] = False
 
-    token = ACCESS_TOKEN = os.environ['HUGGINGFACE_HUB_ACCESS_CODE']
+    token = st.secrets['HUGGINGFACE_HUB_ACCESS_CODE']
     st.session_state['API_URL'] = "https://api-inference.huggingface.co/models/shahiryar/tt_abstract_classifier"
     st.session_state['HEADER'] = {"Authorization": f"Bearer {token}"}
     _ = query("Test text to start the model")
