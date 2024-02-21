@@ -3,12 +3,13 @@ import csv
 import json
 import requests
 import os
+import time
 
 RESOURCE_CLASSES_JSON_PATH = "resources/classes.json"
 
 def query(payload):
-	response = requests.post(st.session_state['API_URL'], headers=st.session_state['HEADER'], json=payload)
-	return response.json()
+    response = requests.post(st.session_state['API_URL'], headers=st.session_state['HEADER'], json=payload)
+    return response.json()
 
 def store_secret(token):
     with open("token", 'w') as token_file:
@@ -22,17 +23,18 @@ def load_cache():
     try:
         token = st.secrets['HUGGINGFACE_HUB_ACCESS_CODE']
     except:
-        try:
-            with open("token", 'r') as file:
-                token = file.read()
-        except:
-            token = input("Huggingface Token was not found in the Environment.\nEnter Token : ")
-            with open("token", 'w') as file:
-                file.write(token)
+        token = input("Huggingface Token was not found in the Environment.\nEnter Token : ")
+        if not os.path.isdir(".streamlit"):
+            os.mkdir(".streamlit")
+        with open(".streamlit/secrets.toml", 'a') as file:
+            file.write(f"HUGGINGFACE_HUB_ACCESS_CODE='{token}'\n")
 
     st.session_state['API_URL'] = "https://api-inference.huggingface.co/models/shahiryar/tt_abstract_classifier"
     st.session_state['HEADER'] = {"Authorization": f"Bearer {token}"}
     _ = query("Test text to start the model")
+    if "error" in str(_).lower():
+        print("Sleeping for 5 secs, while the model starts on server: this won't happen again in this session.")
+        time.sleep(5)
 
 classifier = query
 
