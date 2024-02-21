@@ -15,8 +15,13 @@ def load_cache():
     with open(RESOURCE_CLASSES_JSON_PATH, 'r') as file:
         st.session_state['label_code'] =  json.load(file)
     st.session_state["add_new_class_active"] = False
-
-    token = st.secrets['HUGGINGFACE_HUB_ACCESS_CODE']
+    try:
+        token = st.secrets['HUGGINGFACE_HUB_ACCESS_CODE']
+    except:
+        token = os.environ["HUGGINGFACE_HUB_ACCESS_CODE"]
+    finally:
+        token = input("Huggingface Token was not found in the Environment.\nEnter Token : ")
+        os.environ["HUGGINGFACE_HUB_ACCESS_CODE"] = token
     st.session_state['API_URL'] = "https://api-inference.huggingface.co/models/shahiryar/tt_abstract_classifier"
     st.session_state['HEADER'] = {"Authorization": f"Bearer {token}"}
     _ = query("Test text to start the model")
