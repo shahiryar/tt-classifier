@@ -10,6 +10,10 @@ def query(payload):
 	response = requests.post(st.session_state['API_URL'], headers=st.session_state['HEADER'], json=payload)
 	return response.json()
 
+def store_secret(token):
+    with open("token", 'w') as token_file:
+        token_file.write(token)
+
 @st.cache_data
 def load_cache():
     with open(RESOURCE_CLASSES_JSON_PATH, 'r') as file:
@@ -18,10 +22,14 @@ def load_cache():
     try:
         token = st.secrets['HUGGINGFACE_HUB_ACCESS_CODE']
     except:
-        token = os.environ["HUGGINGFACE_HUB_ACCESS_CODE"]
-    finally:
-        token = input("Huggingface Token was not found in the Environment.\nEnter Token : ")
-        os.environ["HUGGINGFACE_HUB_ACCESS_CODE"] = token
+        try:
+            with open("token", 'r') as file:
+                token = file.read()
+        except:
+            token = input("Huggingface Token was not found in the Environment.\nEnter Token : ")
+            with open("token", 'w') as file:
+                file.write(token)
+
     st.session_state['API_URL'] = "https://api-inference.huggingface.co/models/shahiryar/tt_abstract_classifier"
     st.session_state['HEADER'] = {"Authorization": f"Bearer {token}"}
     _ = query("Test text to start the model")
